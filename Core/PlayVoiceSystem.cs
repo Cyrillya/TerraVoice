@@ -15,7 +15,7 @@ public class PlayVoiceSystem : ModSystem
     private class ModPlayerForEnterWorldHook : ModPlayer
     {
         public override void OnEnterWorld() {
-            foreach (var playerSpeaker in _playerSpeakers) {
+            foreach (var playerSpeaker in PlayerSpeakers) {
                 playerSpeaker?.ClearBuffer();
             }
         }
@@ -23,7 +23,7 @@ public class PlayVoiceSystem : ModSystem
 
     private static readonly byte[] VoiceDataBuffer = new byte[10000];
     private static readonly byte[] DataDecompressedBuffer = new byte[50 * 1024];
-    private static PlayerSpeaker[] _playerSpeakers;
+    public static PlayerSpeaker[] PlayerSpeakers { get; private set; }
     internal const uint SampleRate = 22050; // 44100;
     private static WaveGraphRenderer _waveGraphRenderer;
 
@@ -35,9 +35,9 @@ public class PlayVoiceSystem : ModSystem
     /// <param name="position">数据的起始位置</param>
     /// <param name="len">数据的长度</param>
     public static void AddDataToBufferedWaveProvider(int player, byte[] data, int position, int len) {
-        _playerSpeakers[player] ??= new PlayerSpeaker();
-        _playerSpeakers[player].AddSamples(data, position, len);
-        SetPanAndVolume(_playerSpeakers[player].WaveProvider, player);
+        PlayerSpeakers[player] ??= new PlayerSpeaker();
+        PlayerSpeakers[player].AddSamples(data, position, len);
+        SetPanAndVolume(PlayerSpeakers[player].WaveProvider, player);
     }
 
     private static void SetPanAndVolume(PanningSampleProvider provider, int whoAmI) {
@@ -60,16 +60,16 @@ public class PlayVoiceSystem : ModSystem
     }
 
     public override void Load() {
-        _playerSpeakers = new PlayerSpeaker[Main.maxPlayers];
+        PlayerSpeakers = new PlayerSpeaker[Main.maxPlayers];
         _waveGraphRenderer = new WaveGraphRenderer();
     }
 
     public override void Unload() {
-        foreach (var playerSpeaker in _playerSpeakers) {
+        foreach (var playerSpeaker in PlayerSpeakers) {
             playerSpeaker?.Dispose();
         }
 
-        _playerSpeakers = null;
+        PlayerSpeakers = null;
         _waveGraphRenderer?.Dispose();
         _waveGraphRenderer = null;
     }
@@ -90,10 +90,8 @@ public class PlayVoiceSystem : ModSystem
         //     Main.NewText("Yes");
         // }
 
-        if (PersonalConfig.Instance.HearYourself || PersonalConfig.Instance.ShowWave) {
-            SteamUser.DecompressVoice(VoiceDataBuffer, dataSize, DataDecompressedBuffer,
-                (uint) DataDecompressedBuffer.Length, out uint bytesWritten, SampleRate);
-            _waveGraphRenderer.AddSamples(DataDecompressedBuffer, 0, (int) bytesWritten);
-        }
+        SteamUser.DecompressVoice(VoiceDataBuffer, dataSize, DataDecompressedBuffer,
+            (uint) DataDecompressedBuffer.Length, out uint bytesWritten, SampleRate);
+        _waveGraphRenderer.AddSamples(DataDecompressedBuffer, 0, (int) bytesWritten);
     }
 }

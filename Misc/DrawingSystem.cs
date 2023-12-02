@@ -8,6 +8,8 @@ using Terraria.DataStructures;
 using Terraria.GameContent;
 using Terraria.ModLoader;
 using Terraria.UI;
+using Terraria.UI.Chat;
+using TerraVoice.Core;
 
 namespace TerraVoice.Misc;
 
@@ -18,6 +20,8 @@ public class DrawingSystem : ModSystem
     internal static int[] PlayerSpeaking = new int[Main.maxPlayers];
     private static float[] _iconOpacity = new float[Main.maxPlayers];
     private static int _iconAnimationTimer = 0;
+    internal static float RealVolume { get; set; }
+    private static float _currentDisplayedVolume;
 
     public override void PostUpdateTime() {
         _iconAnimationTimer++;
@@ -40,34 +44,7 @@ public class DrawingSystem : ModSystem
     private void FullscreenMapDraw(Vector2 arg1, float arg2) {
         Main.spriteBatch.Begin(default, default, default, default, default, default, Main.UIScaleMatrix);
 
-        #region Speaking Players
-
-        if (!VoiceConfig.Instance.VoiceAttenuation) {
-            var tex = ModAsset.Speaking;
-            int frameCount = _iconAnimationTimer / 10 % 3;
-            var frame = tex.Frame(horizontalFrames: 1, verticalFrames: 3, frameX: 0, frameY: frameCount);
-            int x = 8;
-            int y = 8;
-            for (var i = 0; i < Main.maxPlayers; i++) {
-                var opacity = _iconOpacity[i];
-                if (opacity <= 0) continue;
-
-                var position = new Vector2(x, y);
-                var iconColor = i == Main.myPlayer ? Main.OurFavoriteColor : Color.White;
-                iconColor *= opacity;
-                Main.spriteBatch.Draw(tex.Value, position, frame, iconColor, 0f, Vector2.Zero, 1f, SpriteEffects.None,
-                    0f);
-
-                position.X += frame.Width + 4;
-                DrawPlayerHead(Main.player[i], ref position, opacity, 0.8f, Color.White);
-                ;
-
-                y += frame.Height + 4;
-            }
-        }
-
-        #endregion
-
+        DrawSpeakingPlayers();
         DrawMicrophoneIcon();
 
         Main.spriteBatch.End();
@@ -104,32 +81,74 @@ public class DrawingSystem : ModSystem
     }
 
     private bool DrawSpeakingPlayers() {
-        if (VoiceConfig.Instance.VoiceAttenuation) return true;
+        _currentDisplayedVolume += (RealVolume - _currentDisplayedVolume) * 0.4f;
 
-        var tex = ModAsset.Speaking;
+        var speakingTexture = ModAsset.Speaking.Value;
         int frameCount = _iconAnimationTimer / 10 % 3;
-        var frame = tex.Frame(horizontalFrames: 1, verticalFrames: 3, frameX: 0, frameY: frameCount);
-        int x = 8;
-        int y = Main.screenHeight - 8;
+        var frame = speakingTexture.Frame(horizontalFrames: 1, verticalFrames: 3, frameX: 0, frameY: frameCount);
+
+        bool isXuansBarDrawn = false; // 第一个音量条是独特的
+        var screenCenter = Main.ScreenSize.ToVector2() / 2f;
+        var basePosition = new Vector2(screenCenter.X, 8f);
+        basePosition.X -= 135f;
         for (var i = 0; i < Main.maxPlayers; i++) {
             var opacity = _iconOpacity[i];
             if (opacity <= 0) continue;
+            
+            var player = Main.player[i];
+            float playerToCenterX = player.Center.X - (screenCenter.X + Main.screenPosition.X);
+            int attenuationDistance = VoiceConfig.Instance.VoiceAttenuationDistance * 16;
+            bool tooFarToHear = Math.Abs(playerToCenterX) > attenuationDistance;
+            if (VoiceConfig.Instance.VoiceAttenuation && tooFarToHear && i != Main.myPlayer) continue;
 
-            y -= frame.Height + 4;
-            var position = new Vector2(x, y);
-            var iconColor = i == Main.myPlayer ? Main.OurFavoriteColor : Color.White;
+            var position = basePosition;
+            DrawPlayerHead(player, position, opacity, 0.8f, Color.White);
+
+            position.X += 32f;
+            float textMaxSize = 90f;
+            var playerName = player.name;
+            string displayedName = "";
+            for (var j = 0; j < playerName.Length; j++) {
+                displayedName += playerName[j];
+                if (i < playerName.Length - 2 &&
+                    FontAssets.MouseText.Value.MeasureString(displayedName + "…").X > textMaxSize - 6f) {
+                    displayedName += "…";
+                    break;
+                }
+            }
+            ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, FontAssets.MouseText.Value, displayedName, position,
+                Color.White * opacity, 0f, Vector2.Zero, Vector2.One, spread: 1f);
+
+            position.X += 94f;
+            var iconColor = Color.White;
             iconColor *= opacity;
-            Main.spriteBatch.Draw(tex.Value, position, frame, iconColor, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(speakingTexture, position, frame, iconColor, 0f, Vector2.Zero, 1f, SpriteEffects.None,
+                0f);
 
             position.X += frame.Width + 4;
-            DrawPlayerHead(Main.player[i], ref position, opacity, 0.8f, Color.White);
-
-            // var position = player.Center - Main.screenPosition + new Vector2(0, -player.height / 2 - 10);
-            // Main.spriteBatch.Draw(frame, position, null, Color.White * opacity, 0f, frame.Size() / 2, 1f,
-            //     SpriteEffects.None, 0f);}
+            var barTexture = !isXuansBarDrawn ? ModAsset.VolumeBarXuan.Value : ModAsset.VolumeBar.Value;
+            isXuansBarDrawn = true;
+            DrawVolumeBar(i, barTexture, position);
+            
+            basePosition.Y += 30f;
         }
 
         return true;
+    }
+
+    private void DrawVolumeBar(int whoAmI, Texture2D barTexture, Vector2 position) {
+        PlayVoiceSystem.PlayerSpeakers[whoAmI] ??= new PlayerSpeaker();
+        var speaker = PlayVoiceSystem.PlayerSpeakers[whoAmI];
+        speaker.CurrentDisplayedVolume += (speaker.RealVolume - speaker.CurrentDisplayedVolume) * 0.4f;
+        float volume = whoAmI == Main.myPlayer ? _currentDisplayedVolume : speaker.CurrentDisplayedVolume;
+
+        var volumeFilledFrame = barTexture.Frame(horizontalFrames: 1, verticalFrames: 2, frameX: 0, frameY: 0);
+        var volumeEmptyFrame = barTexture.Frame(horizontalFrames: 1, verticalFrames: 2, frameX: 0, frameY: 1);
+        volumeFilledFrame.Width = (int) (volumeEmptyFrame.Width * volume);
+        Main.spriteBatch.Draw(barTexture, position, volumeEmptyFrame, Color.White, 0f, Vector2.Zero, 1f,
+            SpriteEffects.None, 0f);
+        Main.spriteBatch.Draw(barTexture, position, volumeFilledFrame, Color.White, 0f, Vector2.Zero, 1f,
+            SpriteEffects.None, 0f);
     }
 
     private bool DrawMicrophoneIcon() {
@@ -169,7 +188,7 @@ public class DrawingSystem : ModSystem
         Main.OnPostFullscreenMapDraw -= FullscreenMapDraw;
     }
 
-    public void DrawPlayerHead(Player drawPlayer, ref Vector2 position, float opacity = 1f, float scale = 1f,
+    public void DrawPlayerHead(Player drawPlayer, Vector2 position, float opacity = 1f, float scale = 1f,
         Color borderColor = default) {
         var playerHeadDrawRenderTargetContent = Main.MapPlayerRenderer._playerRenders[drawPlayer.whoAmI];
         playerHeadDrawRenderTargetContent.UsePlayer(drawPlayer);

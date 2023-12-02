@@ -1,5 +1,7 @@
-﻿using NAudio.Wave;
+﻿using System.Linq;
+using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
+using Terraria;
 
 namespace TerraVoice.Core;
 
@@ -8,6 +10,9 @@ namespace TerraVoice.Core;
 /// </summary>
 public class PlayerSpeaker
 {
+    public float RealVolume { get; set; }
+    public float CurrentDisplayedVolume { get; set; }
+
     /// <summary>
     /// The WaveOut instance to play the sound
     /// </summary>
@@ -28,7 +33,11 @@ public class PlayerSpeaker
         _bufferedWaveProvider = new BufferedWaveProvider(new WaveFormat((int) PlayVoiceSystem.SampleRate, 1)) {
             DiscardOnBufferOverflow = true
         };
-        WaveProvider = new PanningSampleProvider(_bufferedWaveProvider.ToSampleProvider()) {
+        var meteringSampleProvider = new MeteringSampleProvider(_bufferedWaveProvider.ToSampleProvider());
+        meteringSampleProvider.StreamVolume += (_, args) => {
+            RealVolume = args.MaxSampleValues.Max();
+        };
+        WaveProvider = new PanningSampleProvider(meteringSampleProvider) {
             PanStrategy = new SinPanStrategyWithVolume()
         };
         WaveOut.Init(WaveProvider);
