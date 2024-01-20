@@ -17,7 +17,7 @@ public static class Helper
     }
 
     public static float DamageMultiplierCurve(float db) {
-        float factor = Math.Clamp(Utils.GetLerpValue(VoiceConfig.Instance.EnvironmentDecibel, 120, db), 0, 1);
+        float factor = Math.Clamp(Utils.GetLerpValue(VoiceConfig.Instance.EnvironmentDecibel, 110, db), 0, 1);
         // 圆右下的1/4圆，即 x^2 + (y-1)^2 = 1 的下半部分
         float value = 2 - (MathF.Sqrt(1 - MathF.Pow(factor, 2)) + 1);
         // 更加明显的激增

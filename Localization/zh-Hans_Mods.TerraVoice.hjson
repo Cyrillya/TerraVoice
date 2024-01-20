@@ -1,4 +1,5 @@
 Keybinds.TalkKeybind.DisplayName: 语音按键
+InfoDisplays.VolumeInfoDisplay.DisplayName: 音量
 
 Configs: {
 	VoiceConfig: {
@@ -47,7 +48,7 @@ Configs: {
 
 		DmgMultiMaximum: {
 			Label: 最高伤害倍率
-			Tooltip: 音量超过120dB(大喊大叫)时的伤害倍率，默认为100倍
+			Tooltip: 音量超过110dB(大喊大叫)时的伤害倍率，默认为100倍
 		}
 
 		DecibelTest: {

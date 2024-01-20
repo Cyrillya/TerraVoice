@@ -12,6 +12,8 @@ public class SoundDamageModule
     private class TheModPlayer : ModPlayer
     {
         public override void PostUpdateEquips() {
+            if (!VoiceConfig.Instance.DamageAffectedBySound) return;
+
             var speaker = PlayVoiceSystem.PlayerSpeakers[Player.whoAmI];
             if (speaker is null) return;
 
@@ -20,7 +22,9 @@ public class SoundDamageModule
                 : speaker.CurrentDisplayedVolume;
             float db = Helper.GetDecibel(volume);
             float factor = Helper.DamageMultiplierCurve(db);
-            Player.GetDamage(DamageClass.Generic) *= MathHelper.Lerp(VoiceConfig.Instance.DmgMultiMinimum, VoiceConfig.Instance.DmgMultiMaximum,
+            Player.GetDamage(DamageClass.Generic) *= MathHelper.Lerp(
+                VoiceConfig.Instance.DmgMultiMinimum,
+                VoiceConfig.Instance.DmgMultiMaximum,
                 factor);
         }
     }

@@ -1,4 +1,5 @@
 Keybinds.TalkKeybind.DisplayName: Voice Chat Keybind
+InfoDisplays.VolumeInfoDisplay.DisplayName: Volume
 
 Configs: {
 	VoiceConfig: {
