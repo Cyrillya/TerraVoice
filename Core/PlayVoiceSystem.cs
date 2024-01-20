@@ -84,7 +84,7 @@ public class PlayVoiceSystem : ModSystem
     public override void UpdateUI(GameTime gameTime) {
         if (SteamUser.GetAvailableVoice(out var dataSize) is not EVoiceResult.k_EVoiceResultOK || dataSize <= 0) return;
 
-        SteamUser.GetVoice(true, VoiceDataBuffer, dataSize, out _);
+        SteamUser.GetVoice(true, VoiceDataBuffer, dataSize, out var bytesWrittden);
         TerraVoice.PushVoiceBuffer(VoiceDataBuffer, dataSize);
         // if (data.Any(d => d is not 0)) {
         //     Main.NewText("Yes");

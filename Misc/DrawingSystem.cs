@@ -21,7 +21,23 @@ public class DrawingSystem : ModSystem
     private static float[] _iconOpacity = new float[Main.maxPlayers];
     private static int _iconAnimationTimer = 0;
     internal static float RealVolume { get; set; }
-    private static float _currentDisplayedVolume;
+    internal static float CurrentDisplayedVolume;
+
+    public override void UpdateUI(GameTime gameTime) {
+        // 支持High FPS Support Mod的高帧率
+        double timeFactor = gameTime.ElapsedGameTime.TotalMilliseconds * 0.06;
+
+        float GetVolumePlus(float realVolume, float curDisplayedVolume) =>
+            (float) ((realVolume - curDisplayedVolume) * 0.4f * timeFactor);
+
+        CurrentDisplayedVolume += GetVolumePlus(RealVolume, CurrentDisplayedVolume);
+        for (var i = 0; i < Main.maxPlayers; i++) {
+            var speaker = PlayVoiceSystem.PlayerSpeakers[i];
+            if (speaker is null) continue;
+
+            speaker.CurrentDisplayedVolume += GetVolumePlus(speaker.RealVolume, speaker.CurrentDisplayedVolume);
+        }
+    }
 
     public override void PostUpdateTime() {
         _iconAnimationTimer++;
@@ -81,7 +97,7 @@ public class DrawingSystem : ModSystem
     }
 
     private bool DrawSpeakingPlayers() {
-        _currentDisplayedVolume += (RealVolume - _currentDisplayedVolume) * 0.4f;
+        // _currentDisplayedVolume += (RealVolume - _currentDisplayedVolume) * 0.4f;
 
         var speakingTexture = ModAsset.Speaking.Value;
         int frameCount = _iconAnimationTimer / 10 % 3;
@@ -94,7 +110,7 @@ public class DrawingSystem : ModSystem
         for (var i = 0; i < Main.maxPlayers; i++) {
             var opacity = _iconOpacity[i];
             if (opacity <= 0) continue;
-            
+
             var player = Main.player[i];
             float playerToCenterX = player.Center.X - (screenCenter.X + Main.screenPosition.X);
             int attenuationDistance = VoiceConfig.Instance.VoiceAttenuationDistance * 16;
@@ -116,7 +132,16 @@ public class DrawingSystem : ModSystem
                     break;
                 }
             }
-            ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, FontAssets.MouseText.Value, displayedName, position,
+            
+            var speaker = PlayVoiceSystem.PlayerSpeakers[i];
+            if (speaker is not null) {
+                float volume = i == Main.myPlayer ? CurrentDisplayedVolume : speaker.CurrentDisplayedVolume;
+                float db = Helper.GetDecibel(volume);
+                displayedName = db.ToString();
+            }
+
+            ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, FontAssets.MouseText.Value, displayedName,
+                position,
                 Color.White * opacity, 0f, Vector2.Zero, Vector2.One, spread: 1f);
 
             position.X += 94f;
@@ -129,7 +154,7 @@ public class DrawingSystem : ModSystem
             var barTexture = !isXuansBarDrawn ? ModAsset.VolumeBarXuan.Value : ModAsset.VolumeBar.Value;
             isXuansBarDrawn = true;
             DrawVolumeBar(i, barTexture, position);
-            
+
             basePosition.Y += 30f;
         }
 
@@ -139,8 +164,8 @@ public class DrawingSystem : ModSystem
     private void DrawVolumeBar(int whoAmI, Texture2D barTexture, Vector2 position) {
         PlayVoiceSystem.PlayerSpeakers[whoAmI] ??= new PlayerSpeaker();
         var speaker = PlayVoiceSystem.PlayerSpeakers[whoAmI];
-        speaker.CurrentDisplayedVolume += (speaker.RealVolume - speaker.CurrentDisplayedVolume) * 0.4f;
-        float volume = whoAmI == Main.myPlayer ? _currentDisplayedVolume : speaker.CurrentDisplayedVolume;
+        float volume = whoAmI == Main.myPlayer ? CurrentDisplayedVolume : speaker.CurrentDisplayedVolume;
+        volume = Math.Clamp(volume * 2.7f, 0f, 1f);
 
         var volumeFilledFrame = barTexture.Frame(horizontalFrames: 1, verticalFrames: 2, frameX: 0, frameY: 0);
         var volumeEmptyFrame = barTexture.Frame(horizontalFrames: 1, verticalFrames: 2, frameX: 0, frameY: 1);

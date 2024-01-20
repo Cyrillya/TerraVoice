@@ -22,6 +22,38 @@ Configs: {
 				一个十分有趣的特性
 				'''
 		}
+
+		Headers.SoundDamage: 趣味设置 - 音量影响伤害
+
+		DamageAffectedBySound: {
+			Label: 伤害受音量影响
+			Tooltip: 使攻击伤害受音量影响，音量越高伤害越高，对Boss造成“声波攻击”
+		}
+
+		EnvironmentDecibel: {
+			Label: 造成伤害的最小音量
+			Tooltip:
+				'''
+				如果音量分贝值低于此值，则攻击伤害为0
+				如果你想要不说话就没伤害，建议将此值设为 [环境音分贝值+5]
+				你可以在上方提供的分贝测试网页中测试分贝值
+				'''
+		}
+
+		DmgMultiMinimum: {
+			Label: 最低伤害倍率
+			Tooltip: 音量最小时的伤害倍率，默认为0，即没伤害
+		}
+
+		DmgMultiMaximum: {
+			Label: 最高伤害倍率
+			Tooltip: 音量超过120dB(大喊大叫)时的伤害倍率，默认为100倍
+		}
+
+		DecibelTest: {
+			Label: 点此打开分贝测试网页
+			Tooltip: ""
+		}
 	}
 
 	PersonalConfig: {

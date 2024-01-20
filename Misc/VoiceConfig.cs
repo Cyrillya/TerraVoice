@@ -1,11 +1,16 @@
 ﻿using System.ComponentModel;
+using Terraria.ModLoader;
 using Terraria.ModLoader.Config;
+using TerraVoice.Misc.ConfigElements;
 
 namespace TerraVoice.Misc;
 
 public class VoiceConfig : ModConfig
 {
     public override ConfigScope Mode => ConfigScope.ServerSide;
+
+    [CustomModConfigItem(typeof(DecibelTest))]
+    public object DecibelTest;
 
     [DefaultValue(false)]
     public bool VoiceAttenuation;
@@ -16,9 +21,27 @@ public class VoiceConfig : ModConfig
     [Increment(5)]
     public int VoiceAttenuationDistance;
     
-    public static VoiceConfig Instance;
+    [Header("SoundDamage")]
+    [DefaultValue(false)]
+    public bool DamageAffectedBySound;
 
-    public VoiceConfig() {
-        Instance = this;
-    }
+    [Range(50, 100)]
+    [DefaultValue(80)]
+    [Slider]
+    [Increment(5)]
+    public int EnvironmentDecibel;
+
+    [Range(0f, 1f)]
+    [DefaultValue(0f)]
+    [Slider]
+    [Increment(0.1f)]
+    public float DmgMultiMinimum;
+
+    [Range(5, 100)]
+    [DefaultValue(100)]
+    [Slider]
+    [Increment(5)]
+    public int DmgMultiMaximum;
+    
+    public static VoiceConfig Instance => ModContent.GetInstance<VoiceConfig>();
 }

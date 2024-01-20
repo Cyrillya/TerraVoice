@@ -21,7 +21,7 @@ public class WaveGraphRenderer
         meteringSampleProvider.StreamVolume += (_, args) => {
             DrawingSystem.RealVolume = args.MaxSampleValues.Max();
         };
-        var waveProvider = new VolumeSampleProvider(meteringSampleProvider) {
+        var waveProvider = new VolumeAndWaveSampleProvider(meteringSampleProvider) {
             Volume = 0f
         };
         _waveOut.Init(waveProvider);

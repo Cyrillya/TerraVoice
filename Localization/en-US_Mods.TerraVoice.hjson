@@ -13,6 +13,33 @@ Configs: {
 			Label: Voice Attenuation
 			Tooltip: ""
 		}
+
+		Headers.SoundDamage: Sound Damage Header
+
+		DamageAffectedBySound: {
+			Label: Damage Affected By Sound
+			Tooltip: ""
+		}
+
+		EnvironmentDecibel: {
+			Label: Environment Decibel
+			Tooltip: ""
+		}
+
+		DmgMultiMinimum: {
+			Label: Dmg Multi Minimum
+			Tooltip: ""
+		}
+
+		DmgMultiMaximum: {
+			Label: Dmg Multi Maximum
+			Tooltip: ""
+		}
+
+		DecibelTest: {
+			Label: Decibel Test
+			Tooltip: ""
+		}
 	}
 
 	PersonalConfig: {

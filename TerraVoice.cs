@@ -12,7 +12,6 @@ public partial class TerraVoice : Mod
     }
 
     public override void Unload() {
-        VoiceConfig.Instance = null;
         PersonalConfig.Instance = null;
     }
 }
