@@ -133,12 +133,13 @@ public class DrawingSystem : ModSystem
                 }
             }
             
-            var speaker = PlayVoiceSystem.PlayerSpeakers[i];
-            if (speaker is not null) {
-                float volume = i == Main.myPlayer ? CurrentDisplayedVolume : speaker.CurrentDisplayedVolume;
-                float db = Helper.GetDecibel(volume);
-                displayedName = db.ToString();
-            }
+            // 调试用
+            // var speaker = PlayVoiceSystem.PlayerSpeakers[i];
+            // if (speaker is not null) {
+            //     float volume = i == Main.myPlayer ? CurrentDisplayedVolume : speaker.CurrentDisplayedVolume;
+            //     float db = Helper.GetDecibel(volume);
+            //     displayedName = db.ToString();
+            // }
 
             ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, FontAssets.MouseText.Value, displayedName,
                 position,

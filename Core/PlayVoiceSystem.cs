@@ -52,7 +52,7 @@ public class PlayVoiceSystem : ModSystem
         float playerToCenterX = player.Center.X - screenCenter.X;
         int attenuationDistance = VoiceConfig.Instance.VoiceAttenuationDistance * 16;
         // 声音衰减和声音定位(3D音效)
-        float volume = Math.Clamp(1f - Math.Abs(playerToCenterX) / attenuationDistance, 0f, 1f);
+        float volume = Math.Clamp(1f - player.Center.Distance(screenCenter) / attenuationDistance, 0f, 1f);
         volume *= PersonalConfig.Instance.VoiceVolume / 100f;
         float pan = Math.Clamp(playerToCenterX / attenuationDistance, -1f, 1f);
         ((SinPanStrategyWithVolume) provider.PanStrategy).Volume = volume;
