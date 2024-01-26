@@ -43,5 +43,15 @@ public class VoiceConfig : ModConfig
     [Increment(5)]
     public int DmgMultiMaximum;
     
+    [Header("QuietOrExplode")]
+    [DefaultValue(false)]
+    public bool ExplodeMode;
+
+    [Range(80, 115)]
+    [DefaultValue(96)]
+    [Slider]
+    [Increment(1)]
+    public int ExplodeDecibel;
+    
     public static VoiceConfig Instance => ModContent.GetInstance<VoiceConfig>();
 }

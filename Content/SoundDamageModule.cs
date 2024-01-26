@@ -9,7 +9,7 @@ namespace TerraVoice.Content;
 
 public class SoundDamageModule
 {
-    private class TheModPlayer : ModPlayer
+    private class DamageModPlayer : ModPlayer
     {
         public override void PostUpdateEquips() {
             if (!VoiceConfig.Instance.DamageAffectedBySound) return;

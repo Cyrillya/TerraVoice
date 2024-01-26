@@ -15,7 +15,10 @@ Configs: {
 			Tooltip: ""
 		}
 
-		Headers.SoundDamage: Sound Damage Header
+		Headers: {
+			SoundDamage: Sound Damage Header
+			QuietOrExplode: Quiet Or Explode Header
+		}
 
 		DamageAffectedBySound: {
 			Label: Damage Affected By Sound
@@ -39,6 +42,16 @@ Configs: {
 
 		DecibelTest: {
 			Label: Decibel Test
+			Tooltip: ""
+		}
+
+		ExplodeMode: {
+			Label: Explode Mode
+			Tooltip: ""
+		}
+
+		ExplodeDecibel: {
+			Label: Explode Decibel
 			Tooltip: ""
 		}
 	}
@@ -83,3 +96,5 @@ Configs: {
 		Toggle.Label: Toggle
 	}
 }
+
+Projectiles.ExplodeProj.DisplayName: Explode Proj

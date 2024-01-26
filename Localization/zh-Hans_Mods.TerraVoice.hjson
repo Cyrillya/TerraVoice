@@ -24,7 +24,10 @@ Configs: {
 				'''
 		}
 
-		Headers.SoundDamage: 趣味设置 - 音量影响伤害
+		Headers: {
+			SoundDamage: 音量影响伤害
+			QuietOrExplode: 给我安静点！
+		}
 
 		DamageAffectedBySound: {
 			Label: 伤害受音量影响
@@ -54,6 +57,16 @@ Configs: {
 		DecibelTest: {
 			Label: 点此打开分贝测试网页
 			Tooltip: ""
+		}
+
+		ExplodeMode: {
+			Label: 音量过大时爆炸
+			Tooltip: 如果音量超过下面设置的音量大小，就会爆炸，音量越大爆炸威力越大
+		}
+
+		ExplodeDecibel: {
+			Label: 爆炸音量阈值
+			Tooltip: 如果音量分贝值高于此值，则会爆炸
 		}
 	}
 
@@ -115,3 +128,5 @@ Configs: {
 		Toggle.Label: 切换
 	}
 }
+
+Projectiles.ExplodeProj.DisplayName: 和你爆了！
