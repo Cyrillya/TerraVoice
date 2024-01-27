@@ -18,7 +18,7 @@ public class ExplodeProj : ModProjectile
 
         float factor = GetDecibelFactor(decibel);
         int damage = (int) MathHelper.Lerp(250, 50000, factor);
-        Main.NewText(damage);
+        // Main.NewText(damage);
         return Projectile.NewProjectileDirect(new EntitySource_Misc("SpeakingTooLoud"), position, Vector2.Zero,
             ModContent.ProjectileType<ExplodeProj>(), damage, 10f, ai0: decibel);
     }
