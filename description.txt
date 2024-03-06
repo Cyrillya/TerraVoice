@@ -14,6 +14,7 @@ How to use:
 Credit to lapisqui, Ryan for helping in the testing and debugging of the mod.
 Credit to Entropy for helping me test the mod on Linux.
 Credit to Trebuchet for the beautiful GUI sprites.
+Credit to Mirsario for helping fix a locale-related crash.
 
 
 

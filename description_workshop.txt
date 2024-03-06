@@ -14,5 +14,6 @@ How to use:
 Credit to lapisqui, Ryan for helping in the testing and debugging of the mod.
 Credit to Entropy for helping me test the mod on Linux.
 Credit to Trebuchet for the beautiful GUI sprites.
+Credit to Mirsario for helping fix a locale-related crash.
 
 This mod's source is available on [url=https://github.com/Cyrillya/TerraVoice]GitHub[/url].
