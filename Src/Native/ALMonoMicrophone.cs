@@ -1,13 +1,14 @@
-﻿using Silk.NET.Core.Contexts;
-using Silk.NET.Core.Loader;
-using Silk.NET.OpenAL;
-using Silk.NET.OpenAL.Extensions.EXT.Enumeration;
-using Silk.NET.OpenAL.Extensions.EXT;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Linq;
+using Silk.NET.Core.Contexts;
+using Silk.NET.Core.Loader;
+using Silk.NET.OpenAL;
+using Silk.NET.OpenAL.Extensions.EXT;
+using Silk.NET.OpenAL.Extensions.EXT.Enumeration;
+using TerraVoice.Src.Native;
 
 namespace TerraVoice.Native;
 
@@ -36,7 +37,15 @@ internal class ALMonoMicrophone : IDisposable
 
         unsafe
         {
-            device = capture.CaptureOpenDevice(microphone, sampleRate, BufferFormat.Mono16, desiredFrameSize);
+            var alcCaptureOpenDevice = (delegate* unmanaged[Cdecl]<byte*, uint, BufferFormat, int, Device*>)capture.CurrentVTable.Load("alcCaptureOpenDevice");
+            using var microphoneNative = NativeString.AllocFromString(microphone);
+
+            device = alcCaptureOpenDevice((byte*)microphoneNative.Handle, sampleRate, BufferFormat.Mono16, desiredFrameSize);
+
+            if (device == null)
+            {
+                TerraVoice.Instance.Logger.Warn($"Failed to open device '{microphone}'!");
+            }
         }
 
         buffer = new short[desiredFrameSize];
@@ -53,6 +62,8 @@ internal class ALMonoMicrophone : IDisposable
 
             Task.Factory.StartNew(() =>
             {
+                var spinWait = new SpinWait();
+
                 while (true)
                 {
                     if (token.IsCancellationRequested)
@@ -79,6 +90,8 @@ internal class ALMonoMicrophone : IDisposable
 
                         OnBufferReady?.Invoke(copy);
                     }
+
+                    spinWait.SpinOnce();
                 }
             }, source.Token);
         }
